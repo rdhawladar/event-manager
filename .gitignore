@@ -1,0 +1,8 @@
+main
+main.exe
+.vscode
+.idea
+.air.toml
+tmp/
+vendor
+.DS_Store
