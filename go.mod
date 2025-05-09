@@ -1,8 +1,10 @@
-module event_management_sql
+module event-manager
 
-go 1.24.0
+go 1.21
 
 require (
-	filippo.io/edwards25519 v1.1.0 // indirect
-	github.com/go-sql-driver/mysql v1.9.2 // indirect
+	github.com/lib/pq v1.10.9
+	github.com/swaggo/swag v1.16.3
+	github.com/swaggo/http-swagger v1.3.4
+	github.com/swaggo/files v1.0.1
 )
