@@ -1,4 +1,4 @@
-.PHONY: build run stop clean test logs db-shell
+.PHONY: build run stop clean test logs db-shell swagger watch watch-docker
 
 # Build the application and Docker images
 build:
@@ -7,6 +7,7 @@ build:
 
 # Run the application in containers
 run:
+watch:
 	docker-compose up
 
 # Run the application in background
@@ -37,6 +38,18 @@ db-shell:
 # Rebuild and restart a specific service (usage: make restart service=app)
 restart:
 	docker-compose up -d --build $(service)
+
+# Generate Swagger documentation
+swagger:
+	~/go/bin/swag init
+
+# Install air for hot-reloading
+install-air:
+	go install github.com/cosmtrek/air@v1.49.0
+
+# Watch and reload the application locally
+watch-local:
+	$(shell go env GOPATH)/bin/air
 
 # Default target
 all: build run 
