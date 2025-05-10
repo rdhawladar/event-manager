@@ -7,11 +7,10 @@ build:
 
 # Run the application in containers
 run:
-watch:
 	docker-compose up
 
-# Run the application in background
-run-detached:
+# Run the application in background as detacheed
+run-d:
 	docker-compose up -d
 
 # Stop all containers
@@ -48,7 +47,7 @@ install-air:
 	go install github.com/cosmtrek/air@v1.49.0
 
 # Watch and reload the application locally
-watch-local:
+watch:
 	$(shell go env GOPATH)/bin/air
 
 # Default target

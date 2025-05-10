@@ -80,7 +80,7 @@ A RESTful API built with Go for managing events, featuring PostgreSQL database i
 
 3. Run the application with hot-reloading:
    ```bash
-   make watch-local
+   make watch
    ```
 
 ## 📚 API Documentation
@@ -127,7 +127,7 @@ CREATE TABLE events (
 - `make db-shell` - Access PostgreSQL shell
 - `make restart service=<service>` - Rebuild and restart a specific service
 - `make swagger` - Generate Swagger documentation
-- `make watch-local` - Run with hot-reloading locally
+- `make watch` - Run with hot-reloading locally
 
 ## 📝 API Request Examples
 
