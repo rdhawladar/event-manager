@@ -48,6 +48,18 @@ type PaginatedResponse struct {
 	TotalPages int         `json:"total_pages"`
 }
 
+// ValidationError represents a validation error
+type ValidationError struct {
+	Field   string `json:"field"`
+	Message string `json:"message"`
+}
+
+// ValidationResponse represents a validation error response
+type ValidationResponse struct {
+	Message string            `json:"message"`
+	Errors  []ValidationError `json:"errors"`
+}
+
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	log.Println("Starting application...")
@@ -208,28 +220,47 @@ func listEvent(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param event body Event true "Event object"
 // @Success 201 {object} Response
+// @Failure 422 {object} ValidationResponse
+// @Failure 500 {string} string
 // @Router /events [post]
 func createEvent(w http.ResponseWriter, r *http.Request) {
 	var event Event
 	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	// Validate the event
+	errors := validateEvent(event)
+	if len(errors) > 0 {
+		validationResponse := ValidationResponse{
+			Message: "Validation errors",
+			Errors:  errors,
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		json.NewEncoder(w).Encode(validationResponse)
+		return
+	}
+
 	event.CreatedAt = time.Now()
 	event.UpdatedAt = time.Now()
 
 	var id int
-	var err error
-	err = db.QueryRow(`INSERT into events(title, description, location, start_time, end_time, created_by, created_at, updated_at) 
-		values($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-		event.Title, event.Description, event.Location, event.StartTime, event.EndTime, event.CreatedBy, event.CreatedAt, event.UpdatedAt).Scan(&id)
+	err := db.QueryRow(`
+		INSERT INTO events (title, description, location, start_time, end_time, created_by, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING id`,
+		event.Title, event.Description, event.Location, event.StartTime, event.EndTime,
+		event.CreatedBy, event.CreatedAt, event.UpdatedAt).Scan(&id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	event.ID = id
 	resp := Response{
-		Message: "Event created",
+		Message: "Event created successfully",
 		Data:    event,
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -353,4 +384,81 @@ func getEventFromDb(id int) (*Event, error) {
 		return nil, err
 	}
 	return &e, nil
+}
+
+// validateEvent performs validation on the event data
+func validateEvent(event Event) []ValidationError {
+	var errors []ValidationError
+
+	// Validate required fields
+	if event.Title == "" {
+		errors = append(errors, ValidationError{
+			Field:   "title",
+			Message: "title is required",
+		})
+	}
+
+	if event.Location == "" {
+		errors = append(errors, ValidationError{
+			Field:   "location",
+			Message: "location is required",
+		})
+	}
+
+	if event.CreatedBy == "" {
+		errors = append(errors, ValidationError{
+			Field:   "created_by",
+			Message: "created_by is required",
+		})
+	} else if !isValidEmail(event.CreatedBy) {
+		errors = append(errors, ValidationError{
+			Field:   "created_by",
+			Message: "created_by must be a valid email address",
+		})
+	}
+
+	// Validate time fields
+	now := time.Now()
+	if event.StartTime.IsZero() {
+		errors = append(errors, ValidationError{
+			Field:   "start_time",
+			Message: "start_time is required",
+		})
+	} else if event.StartTime.Before(now) {
+		errors = append(errors, ValidationError{
+			Field:   "start_time",
+			Message: "start_time must be in the future",
+		})
+	}
+
+	if event.EndTime.IsZero() {
+		errors = append(errors, ValidationError{
+			Field:   "end_time",
+			Message: "end_time is required",
+		})
+	} else if event.EndTime.Before(event.StartTime) {
+		errors = append(errors, ValidationError{
+			Field:   "end_time",
+			Message: "end_time must be after start_time",
+		})
+	}
+
+	return errors
+}
+
+// isValidEmail checks if a string is a valid email address
+func isValidEmail(email string) bool {
+	// Basic email validation
+	if len(email) < 3 || len(email) > 254 {
+		return false
+	}
+	at := strings.Index(email, "@")
+	if at == -1 || at == 0 || at == len(email)-1 {
+		return false
+	}
+	dot := strings.LastIndex(email[at:], ".")
+	if dot == -1 || dot == 0 || dot == len(email[at:])-1 {
+		return false
+	}
+	return true
 }
