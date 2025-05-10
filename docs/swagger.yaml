@@ -1,0 +1,178 @@
+basePath: /
+definitions:
+  main.Event:
+    description: This is a sample event management server.
+    properties:
+      created_at:
+        example: "2024-03-19T15:00:00Z"
+        type: string
+      created_by:
+        example: john.doe
+        type: string
+      description:
+        example: Weekly team sync
+        type: string
+      end_time:
+        example: "2024-03-20T11:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      location:
+        example: Conference Room A
+        type: string
+      start_time:
+        example: "2024-03-20T10:00:00Z"
+        type: string
+      title:
+        example: Team Meeting
+        type: string
+      updated_at:
+        example: "2024-03-19T15:00:00Z"
+        type: string
+    type: object
+  main.PaginatedResponse:
+    properties:
+      data: {}
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total_items:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  main.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: This is a sample event management server.
+  title: Event Manager API
+  version: "1.0"
+paths:
+  /events:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of events from the database
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Number of items per page (default: 10)'
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/main.PaginatedResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/main.Event'
+                  type: array
+              type: object
+      summary: List all events
+      tags:
+      - events
+    post:
+      consumes:
+      - application/json
+      description: Create a new event in the database
+      parameters:
+      - description: Event object
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/main.Event'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.Response'
+      summary: Create a new event
+      tags:
+      - events
+  /events/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an event by its ID
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Response'
+      summary: Delete an event
+      tags:
+      - events
+    get:
+      consumes:
+      - application/json
+      description: Get an event by its ID
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Event'
+      summary: Get a specific event
+      tags:
+      - events
+    put:
+      consumes:
+      - application/json
+      description: Update an existing event by its ID
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Event object
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/main.Event'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Response'
+      summary: Update an event
+      tags:
+      - events
+swagger: "2.0"
