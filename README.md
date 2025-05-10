@@ -2,6 +2,30 @@
 
 A RESTful API built with Go for managing events, featuring PostgreSQL database integration, Docker support, and Swagger documentation.
 
+## 📑 Table of Contents
+
+- [Technical Stack](#-technical-stack)
+- [Prerequisites](#-prerequisites)
+- [Quick Start](#-quick-start)
+  - [Using Docker](#using-docker-recommended)
+  - [Local Development](#local-development)
+- [API Documentation](#-api-documentation)
+  - [Available Endpoints](#available-endpoints)
+- [Database Schema](#-database-schema)
+- [Development Commands](#-development-commands)
+- [API Request Examples](#-api-request-examples)
+  - [Create Event](#create-event)
+  - [List Events](#list-events)
+  - [Get Event](#get-event)
+  - [Update Event](#update-event)
+  - [Delete Event](#delete-event)
+- [Validation Rules](#-validation-rules)
+- [Docker Configuration](#-docker-configuration)
+- [Environment Variables](#-environment-variables)
+- [Project Structure](#-project-structure)
+- [Contributing](#-contributing)
+- [License](#-license)
+
 ## 🛠 Technical Stack
 
 - **Backend**: Go (Golang)
